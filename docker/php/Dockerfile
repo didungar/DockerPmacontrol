@@ -1,29 +1,6 @@
 FROM php:7.2-fpm
-# -alpine
-#RUN apk --update --no-cache add \
-#	lsb_release \
-#	unzip \
-#	icu-dev \
-#	g++ \
-#	freetype-dev \
-#	libjpeg-turbo-dev \
-#	libpng-dev \
-#	libcurl \
-#	bash \
-#	bash-completion \
-#	yaml \
-#	nano \
-#	tar \
-#	make \
-#	libffi-dev \
-#	ruby ruby-irb ruby-rake ruby-io-console ruby-bigdecimal ruby-json ruby-bundler
-RUN apt-get update && apt-get install -y git \
+RUN apt-get update && apt-get install -y git cron \
 	libjpeg-dev libpng-dev libfreetype6-dev lsb-release
-#libjpeg-turbo8
-#	ruby-dev ruby-rdoc \
-#	curl-dev \
-#	libstdc++ tzdata ca-certificates \
-#	&& gem install sass --no-user-install
 
 RUN curl -sS https://getcomposer.org/installer | php \
     && mv composer.phar /usr/local/bin/composer
@@ -53,4 +30,6 @@ RUN docker-php-ext-install zip
 #RUN apk update && apk add git
 RUN git clone https://github.com/PmaControl/PmaControl.git pmacontrol
 RUN cd pmacontrol && composer install
-RUN cd pmacontrol && ./install -c config.json
+ADD config.json pmacontrol/config.json
+WORKDIR /var/www/html/pmacontrol
+RUN ./install -c config.json

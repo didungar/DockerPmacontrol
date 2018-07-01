@@ -1,0 +1,44 @@
+version: '3'
+
+networks:
+#  reverseproxy-network:
+#    external:
+#      name: "reverseproxy_reverseproxy-network"
+  pmacontrol-network:
+    driver: bridge
+
+services:
+  web:
+    image: nginx
+    restart: "unless-stopped"
+    volumes:
+      - "./var/logs/nginx:/var/logs/nginx"
+      - "./config/nginx.conf:/etc/nginx/nginx.conf"
+      - "./:/www"
+    environment:
+      - VIRTUAL_HOST=pmacontrol.lan
+    depends_on:
+      - php
+    networks:
+      - "pmacontrol-network"
+#      - "reverseproxy_reverseproxy-network"
+
+  mariadb:
+    image: mariadb
+    restart: always
+    volumes:
+      - "./var/lib/mysql:/var/lib/mysql"
+    networks:
+      - "pmacontrol-network"
+
+  php:
+    build: docker/php
+    restart: "unless-stopped"
+    volumes:
+      - "./configuration/:/var/www/html/pmacontrol/configuration/"
+
+    depends_on:
+      - mariadb
+    networks:
+      - "pmacontrol-network"
+
